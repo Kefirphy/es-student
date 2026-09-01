@@ -1,12 +1,5 @@
 ﻿git version 2.55.0.windows.5
-python : Python was not found; run without arguments to install from the Microsoft Store, or disable this shortcut fro
-m Settings > Apps > Advanced app settings > App execution aliases.
-At line:2 char:5
-+     python --version | Select-Object -First 1
-+     ~~~~~~~~~~~~~~~~
-    + CategoryInfo          : NotSpecified: (Python was not ...cution aliases.:String) [], RemoteException
-    + FullyQualifiedErrorId : NativeCommandError
- 
+Python 3.14.5 
 cmake version 4.4.3
 GNU Make 3.81
 arm-none-eabi-gcc.exe (Arm GNU Toolchain 15.3.Rel1 (Build arm-15.149)) 15.3.1 20260627
