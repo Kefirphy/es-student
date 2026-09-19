@@ -1,8 +1,9 @@
 #include "pico/stdlib.h"
 #include "hardware/gpio.h"
 #include <stdio.h>
+#include "led.h"
+#include "log.h"
 
-const uint LED_PIN = 25;
 const uint BUTTON_PIN = 24;
 
 const uint DEBOUNCE_MS = 20;
@@ -15,30 +16,26 @@ bool get_button_debounce(uint pin)
 
 }
 
-void set_led(bool on)
-{
-    gpio_put(LED_PIN, on);
-    printf("led %s\n", on ? "on" : "off");
-}
-
-bool handle_command(int command, bool led)
+void handle_command(int command)
 {
     if (command == 'e')
     {
-        led = true;
-        set_led(led);
+        led_set(true);
+        LOG_INF("led %s\n", led_is_on() ? "on" : "off");
     }
     else if (command == 'd')
     {
-        led = false;
-        set_led(led);
+        led_set(false);
+        LOG_INF("led %s\n", led_is_on() ? "on" : "off");
+    }
+    else if (command == 'v')
+    {
+        log_version();
     }
     else
     {
-        printf("unknown command: %c\n", command);
-    }
-
-    return led;
+        LOG_ERR("unknown command: %c\n", command);
+    }    
 }
 
 int main()
@@ -46,8 +43,7 @@ int main()
     stdio_init_all();
 
     // Инициализация светодиода на плате
-    gpio_init(LED_PIN);
-    gpio_set_dir(LED_PIN, GPIO_OUT);
+    led_init();
 
     // Инициализация кнопки
     gpio_init(BUTTON_PIN);
@@ -63,10 +59,10 @@ int main()
          bool current = get_button_debounce(BUTTON_PIN);
 
         // Если раньше было напряжение (кнопка отпущена), а теперь нет (кнопка нажата)
-        if (previous == true && current == false)
+         if (previous == true && current == false)
         {
-            led = !led;             // Меняем флаг светодиода на противоположный
-            set_led(led); // Применяем флаг к реальному светодиоду
+            led_toggle();
+            LOG_INF("led %s\n", led_is_on() ? "on" : "off");
         }
 
         previous = current; // Запоминаем состояние для следующего витка цикла
@@ -78,6 +74,7 @@ int main()
             continue;
         }
 
-        led = handle_command(command, led);
+        LOG_DBG("got %c\n", command);
+        handle_command(command);
     }
 }
