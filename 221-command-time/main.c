@@ -61,6 +61,8 @@ void cmd_uptime(void)
     uptime();
 }
 
+// прикидка: за член ряда 4 операции с double, 175 + 110 + 190 + 110 = 585 тактов;
+// 1 000 000 членов по 585 тактов при 125 МГц — около 4,7 с
 const uint CALC_PI_TERMS = 1000000;
 
 double calc_pi(uint terms)
