@@ -20,7 +20,7 @@
    4.466 <-- board: pico
    4.467 <-- serial: 500315193898930C
    4.468 <-- chip: manufacturer 0x927, part 0x0002, revision 2
-   4.468 <-- project: 2.3.0
+   4.468 <-- pico-sdk: 2.3.0
    6.498 --> nosuchcommand
    6.764 <-- nosuchcommand
    6.765 <-- dbg read_line:68 got nosuchcommand
