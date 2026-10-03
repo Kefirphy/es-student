@@ -8,6 +8,9 @@
 #include "command.h"
 #include "device.h"
 
+#include "led.h"
+#include "hardware/gpio.h"
+
 extern char __flash_binary_start;
 extern char __flash_binary_end;
 extern char __boot2_start__;
@@ -137,4 +140,26 @@ void fw_info(void)
            (unsigned)(uintptr_t)heap_variable, (unsigned)*heap_variable);
 
     free(heap_variable);
+}
+
+
+#define VECTOR_TABLE 0x10000100
+#define SIO_GPIO_IN  0xd0000004
+
+void boot_info(void)
+{
+    const uint32_t *vectors = (const uint32_t *)VECTOR_TABLE;
+    uint32_t stack_top = vectors[0];
+    uint32_t reset_handler = vectors[1];
+    
+    volatile uint32_t *gpio_in = (volatile uint32_t *)SIO_GPIO_IN;
+    uint32_t led_bit = (*gpio_in >> led_pin()) & 1u;
+
+    printf("vector table   0x%08x\n", (unsigned)(uintptr_t)vectors);
+    printf("  stack top    0x%08x\n", (unsigned)stack_top);
+    printf("  reset        0x%08x\n", (unsigned)reset_handler);
+    printf("  reset (even) 0x%08x\n", (unsigned)(reset_handler & ~1u));
+    printf("gpio in        0x%08x\n", (unsigned)(uintptr_t)gpio_in);
+    printf("  led bit      %u\n", (unsigned)led_bit);
+    printf("  gpio_get     %u\n", (unsigned)gpio_get(led_pin()));
 }
