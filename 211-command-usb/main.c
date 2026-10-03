@@ -5,7 +5,7 @@
 #include "log.h"
 #include "device.h"
 #include <string.h>
-#include <memory.h>
+#include "memory.h"
 
 const uint BUTTON_PIN = 24;
 
