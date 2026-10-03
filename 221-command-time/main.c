@@ -1,34 +1,19 @@
 #include "pico/stdlib.h"
-#include "hardware/gpio.h"
 #include <stdio.h>
+#include <string.h>
 #include "led.h"
 #include "log.h"
 #include "device.h"
-#include <string.h>
 #include "memory.h"
 #include "command.h"
 #include "clock.h"
-
-const uint BUTTON_PIN = 24;
 
 #define LINE_SIZE 32
 static char line[LINE_SIZE];
 static uint line_length = 0;
 
-
-const uint DEBOUNCE_MS = 20;
-
-void cmd_enable(void)
-{
-    led_set(true);
-    LOG_INF("led %s\n", led_is_on() ? "on" : "off");
-}
-
-void cmd_disable(void)
-{
-    led_set(false);
-    LOG_INF("led %s\n", led_is_on() ? "on" : "off");
-}
+const uint BLINK_HALF_PERIOD_MS = 500;
+uint64_t last_toggle_us = 0;
 
 void cmd_info(void)
 {
@@ -70,9 +55,12 @@ void cmd_clk_info(void)
     clk_info();
 }
 
+void cmd_uptime(void)
+{
+    uptime();
+}
+
 const struct command_t commands[] = {
-    { "enable", cmd_enable },
-    { "disable", cmd_disable },
     { "info", cmd_info },
     { "version", cmd_version },
     { "ping", cmd_ping },
@@ -81,6 +69,7 @@ const struct command_t commands[] = {
     { "dev_info", cmd_dev_info },
     { "boot_info", cmd_boot_info },
     { "clk_info", cmd_clk_info },
+    { "uptime", cmd_uptime },
 };
 
 const uint command_count = sizeof(commands) / sizeof(commands[0]);
@@ -103,11 +92,15 @@ void handle_command(const char *command)
     LOG_ERR("unknown command: %s\n", command);
 }
 
-bool get_button_debounce(uint pin)
+void blink(void)
 {
-    bool state = gpio_get(pin);
-    sleep_ms(DEBOUNCE_MS);
-    return state && gpio_get(pin);
+    uint64_t now_us = time_us_64();
+
+    if (now_us - last_toggle_us >= BLINK_HALF_PERIOD_MS * 1000)
+    {
+        last_toggle_us = now_us;
+        led_toggle();
+    }
 }
 
 void read_line(void)
@@ -145,31 +138,11 @@ void read_line(void)
 int main()
 {
     stdio_init_all();
-
-    // Инициализация светодиода на плате
     led_init();
-    // Инициализация кнопки
-    gpio_init(BUTTON_PIN);
-    gpio_set_dir(BUTTON_PIN, GPIO_IN); // Теперь пин работает на прием сигнала
-    gpio_pull_up(BUTTON_PIN);          // Включаем подтягивающий резистор
-
-    bool led = false;
-    bool previous = false;
 
     while (1)
     {
-        // Читаем текущее напряжение на пине кнопки
-         bool current = get_button_debounce(BUTTON_PIN);
-
-        // Если раньше было напряжение (кнопка отпущена), а теперь нет (кнопка нажата)
-         if (previous == true && current == false)
-        {
-            led_toggle();
-            LOG_INF("led %s\n", led_is_on() ? "on" : "off");
-        }
-
-        previous = current; // Запоминаем состояние для следующего витка цикла
-
+        blink();
         read_line();
     }
 }

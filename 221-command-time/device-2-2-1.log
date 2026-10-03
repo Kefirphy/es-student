@@ -17,7 +17,7 @@
    2.022 --> info
    2.105 <-- info
    2.106 <-- dbg read_line:129 got info
-   2.106 <-- project: 221_command_time
+   2.106 <-- project: 221-command-time
    2.106 <-- repo: https://github.com/Kefirphy/es-student
    2.107 <-- board: pico
    2.107 <-- serial: 500315193898930C
